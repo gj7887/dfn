@@ -1,0 +1,37 @@
+name: Build and Push Docker image to GHCR
+
+on:
+  push:
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/build-docker-image.yml'
+    branches: [ main, master ]
+
+env:
+  IMAGE_NAME: ghcr.io/gj7887/dfn:0112
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_NAME .
+
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE_NAME
