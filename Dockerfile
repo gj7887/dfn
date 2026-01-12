@@ -33,7 +33,7 @@ RUN cat > start.sh <<'EOF'
 #!/bin/bash
 exec /app/hysteria server -c /app/config.yaml
 EOF
-chmod +x /app/start.sh
+RUN chmod +x /app/start.sh
 
 EXPOSE $SERVER_PORT
 
