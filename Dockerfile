@@ -17,9 +17,23 @@ RUN apt-get update && \
     openssl req -new -x509 -key cert.key -out cert.pem -days 3650 -subj "/CN=localhost" && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --chmod=755 start.sh ./start.sh
+RUN cat > config.yaml <<EOF
+listen: :${SERVER_PORT}
 
-RUN echo "listen: :${SERVER_PORT}\n\nauth:\n  type: password\n  password: $PW\n\ntls:\n  cert: ./cert.pem\n  key: ./cert.key" > config.yaml
+auth:
+  type: password
+  password: $PW
+
+tls:
+  cert: ./cert.pem
+  key: ./cert.key
+EOF
+
+RUN cat > start.sh <<'EOF'
+#!/bin/bash
+exec /app/hysteria server -c /app/config.yaml
+EOF
+chmod +x /app/start.sh
 
 EXPOSE $SERVER_PORT
 
