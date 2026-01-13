@@ -88,6 +88,19 @@ generate_connection_info() {
     echo "hy2://${PW}@${SERVER_IP}:${SERVER_PORT}?sni=${SNI}&insecure=1&alpn=h3#lunes_hy2" > ./hy2.txt
     echo "连接信息:"
     cat ./hy2.txt
+    # 生成不换行的 Base64（兼容常见环境）
+    if command -v base64 >/dev/null 2>&1; then
+      b64=$(printf '%s' "$conn" | base64 -w0 2>/dev/null || printf '%s' "$conn" | base64)
+    else
+      b64=$(printf '%s' "$conn" | openssl base64 -A)
+    fi
+
+    # 保存 Base64 到文件并打印到日志
+    printf '%s\n' "$b64" > app/hy2_base64.txt
+    echo "Connection: $conn"
+    echo "Connection (Base64): $b64"
+    # 如果你想要以 hy2://<base64> 的形式暴露（某些工具需要），可以：
+    echo "hy2_base64://$b64" > app/hy2_base64_uri.txt
 }
 
 # 创建启动脚本
