@@ -8,7 +8,7 @@ on:
     branches: [ main, master ]
 
 env:
-  IMAGE_NAME: ghcr.io/gj7887/dfn:0112
+  IMAGE_NAME: ghcr.io/gj7887/dfn:0113
 
 jobs:
   build-and-push:
