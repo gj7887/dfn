@@ -11,7 +11,7 @@ WORKDIR /app
 
 RUN apt-get update && \
     apt-get install -y wget openssl ca-certificates && \
-    wget -O $APP_NAME "https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-amd64"
+    wget -O $APP_NAME "https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-amd64" && \
     chmod +x $APP_NAME && \
     openssl ecparam -genkey -name prime256v1 -out cert.key && \
     openssl req -new -x509 -key cert.key -out cert.pem -days 3650 -subj "/CN=localhost" && \
