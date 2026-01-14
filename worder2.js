@@ -1930,17 +1930,26 @@ const HTMLBuilder = {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000);
                 
-                const response = await fetch(`https://${ip}:${port}`, {
-                    method: 'HEAD',
-                    signal: controller.signal
-                });
-                
-                clearTimeout(timeoutId);
-                const endTime = performance.now();
-                const latency = Math.round(endTime - startTime);
-                
-                return { ip, port, latency, success: true };
+                try {
+                    const response = await fetch('https://' + ip + ':' + port + '/', {
+                        method: 'GET',
+                        signal: controller.signal,
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0'
+                        }
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    const endTime = performance.now();
+                    const latency = Math.round(endTime - startTime);
+                    
+                    return { ip, port, latency, success: true };
+                } catch (innerError) {
+                    clearTimeout(timeoutId);
+                    return { ip, port, latency: 9999, success: false };
+                }
             } catch (error) {
+                clearTimeout(timeoutId);
                 return { ip, port, latency: 9999, success: false };
             }
         }
@@ -1986,7 +1995,7 @@ const HTMLBuilder = {
                 return;
             }
             
-            showMessage(`开始测试${ips.length}个IP，请稍候...`, 'success');
+            showMessage('开始测试' + ips.length + '个IP，请稍候...', 'success');
             
             // 分批测试，避免阻塞
             const batchSize = 10;
@@ -2018,7 +2027,7 @@ const HTMLBuilder = {
             testResults.sort((a, b) => a.latency - b.latency);
             displayResults(testResults.slice(0, 100)); // 显示前100个
             
-            showMessage(`测试完成！共测试${testResults.length}个IP`, 'success');
+            showMessage('测试完成！共测试' + testResults.length + '个IP', 'success');
             startButton.disabled = false;
             saveButton.disabled = false;
             appendButton.disabled = false;
@@ -2034,18 +2043,18 @@ const HTMLBuilder = {
                 return;
             }
             
-            let html = `<div class="ip-display-info">显示 ${results.length} 个最优IP (延迟从低到高排序)</div>`;
+            let html = '<div class="ip-display-info">显示 ' + results.length + ' 个最优IP (延迟从低到高排序)</div>';
             
             results.forEach((result, index) => {
                 const latencyClass = result.latency < 100 ? 'good-latency' : 
                                    result.latency < 200 ? 'medium-latency' : 'bad-latency';
                 const statusIcon = result.success ? '✅' : '❌';
                 
-                html += `<div class="ip-item">
-                    <span>${index + 1}. ${result.ip}:${result.port}</span>
-                    <span class="${latencyClass}">${result.latency}ms</span>
-                    <span>${statusIcon}</span>
-                </div>`;
+                html += '<div class="ip-item">'
+                    + '<span>' + (index + 1) + '. ' + result.ip + ':' + result.port + '</span>'
+                    + '<span class="' + latencyClass + '">' + result.latency + 'ms</span>'
+                    + '<span>' + statusIcon + '</span>'
+                + '</div>';
             });
             
             ipListEl.innerHTML = html;
@@ -2059,7 +2068,7 @@ const HTMLBuilder = {
             }
             
             const validResults = testResults.filter(r => r.success).slice(0, 100);
-            const ips = validResults.map(r => `${r.ip}:${r.port}`);
+            const ips = validResults.map(r => r.ip + ':' + r.port);
             
             try {
                 const response = await fetch(window.location.pathname, {
